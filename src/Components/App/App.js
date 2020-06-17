@@ -4,6 +4,7 @@ import './App.css';
 import SearchBar from './../SearchBar/SearchBar';
 import SearchResults from './../SearchResults/SearchResults';
 import Playlist from './../Playlist/Playlist';
+import Spotify from './../../util/Spotify';
 
 class App extends React.Component {
   constructor(props) {
@@ -49,11 +50,16 @@ class App extends React.Component {
     this.setState({ playlistName: name });
   }
   savePlaylist() {
-    const trackURIs = this.state.playlistTracks.map((track) => track.id);
-    return trackURIs;
+    const trackURIs = this.state.playlistTracks.map((track) => track.uri);
+    Spotify.savePlaylist(this.state.playlistName, trackURIs);
+    this.setState({
+      playlistName: 'New Playlist',
+      playlistTracks: [],
+    });
   }
   search(term) {
-    console.log(term);
+    const results = Spotify.search(term);
+    this.setState({ searchResults: results });
   }
   render() {
     return (

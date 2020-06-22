@@ -10,17 +10,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchResults: [
-        { name: 'hello', artist: 'adele', album: 'hello', id: 100 },
-        { name: 'hello2', artist: 'adele2', album: 'hello2', id: 101 },
-        { name: 'hello3', artist: 'adele3', album: 'hello3', id: 102 },
-      ],
-      playlistName: 'my songz',
-      playlistTracks: [
-        { name: 'hello', artist: 'adeleeee', album: 'hello', id: 100 },
-        { name: 'hello2', artist: 'adeleeee2', album: 'hello2', id: 101 },
-        { name: 'hello3', artist: 'adeleee3', album: 'hello3', id: 102 },
-      ],
+      searchResults: [],
+      playlistName: 'New Playlist',
+      playlistTracks: [],
     };
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -29,37 +21,39 @@ class App extends React.Component {
     this.search = this.search.bind(this);
   }
   addTrack(track) {
-    if (
-      this.state.playlistTracks.find((savedTrack) => savedTrack.id === track.id)
-    ) {
-      return;
-    } else {
-      this.setState((state) => {
-        const newplaylistTracks = state.playlistTracks.push(track);
-        return { playlistTracks: newplaylistTracks };
-      });
+    let tracks = this.state.playlistTracks;
+    if (!tracks.find((trackIndex) => trackIndex.id === track.id)) {
+      tracks.push(track);
+      this.setState({ playlistTracks: tracks });
     }
   }
   removeTrack(track) {
-    const newTracks = this.state.playlistTracks.filter(
-      (currentTrack) => currentTrack.id !== track.id
-    );
+    let tracks = this.state.playlistTracks;
+    let newTracks = tracks.filter((trackIndex) => trackIndex.id !== track.id);
     this.setState({ playlistTracks: newTracks });
   }
   updatePlaylistName(name) {
     this.setState({ playlistName: name });
   }
   savePlaylist() {
-    const trackURIs = this.state.playlistTracks.map((track) => track.uri);
-    Spotify.savePlaylist(this.state.playlistName, trackURIs);
-    this.setState({
-      playlistName: 'New Playlist',
-      playlistTracks: [],
-    });
+    let tracks = this.state.playlistTracks;
+    if (tracks.length && this.state.playlistName) {
+      let trackURIs = tracks.map((trackIndex) => trackIndex.uri);
+      Spotify.savePlaylist(this.state.playlistName, trackURIs).then(() => {
+        this.setState({
+          playlistName: 'New Playlist',
+          playlistTracks: [],
+        });
+        document.getElementById(
+          'Playlist-name'
+        ).value = this.state.playlistName;
+      });
+    }
   }
-  search(term) {
-    const results = Spotify.search(term);
-    this.setState({ searchResults: results });
+  search(searchTerm) {
+    Spotify.search(searchTerm).then((results) => {
+      this.setState({ searchResults: results });
+    });
   }
   render() {
     return (
